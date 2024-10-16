@@ -22,7 +22,7 @@ import { ThemeChanger } from "./Theme";
 import { useJobContext } from "@/context/JobContext";
 
 export function Navbar() {
-  const { saveMidspansToFile} = useJobContext();
+  const { exportToExcel } = useJobContext();
   return (
     <div className="h-12 flex w-full items-center bg-primary-foreground">
       <div className="flex items-center px-3 gap-8">
@@ -45,7 +45,7 @@ export function Navbar() {
         <div className="text-sm cursor-pointer">
           Export
         </div>
-        <div onClick={() => saveMidspansToFile()}>save</div>
+        <div onClick={() => exportToExcel()}>save</div>
       </div>
       <div className="ml-auto flex mr-4 items-center gap-4">
         <TooltipProvider>

@@ -54179,7 +54179,7 @@
 				let point = this.points[0];
 				let heightAboveGround; 
 					if (point.HeightAboveGround && point.classification) {
-						if (point.classification[0] === 23 || point.classification[0] === 24) {
+						if (point.classification[0] === 1 || point.classification[0] === 18) {
 							heightAboveGround = point.HeightAboveGround[0];
 						}
 					}

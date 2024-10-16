@@ -8,9 +8,6 @@ const MidspanIcon = (midspan: unknown, selectedMispan: Position | null) => {
   const scale = 4;
   const color = "blue";
   const opacity = 1;
-  console.log(midspan);
-  console.log(selectedMispan);
-
   const isSelected = midspan === selectedMispan;
   const svg = `
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${scale * 4}" height="${scale * 4}">
@@ -128,6 +125,7 @@ function MapInstance() {
   }
 
   const handleMarkerClick = (marker: Position) => {
+    console.log("MAPINSTANCE", marker)
     if (activeTool === 'routing' && selectedMarker) {
       const midpoint = calculateMiddlePoint(marker, selectedMarker)
       const xyzMidspan = geographicToLocal(midpoint.lat, midpoint.lng, marker.z);
@@ -143,9 +141,6 @@ function MapInstance() {
       
       if (!midspanExists(newMidspan)) {
         setMidspans([...midspans, newMidspan]);
-        console.log("new midspans")
-      } else {
-        console.log("Midspan already exists");
       }
     }
     setSelectedMarker(marker)
@@ -153,7 +148,6 @@ function MapInstance() {
 
   const midspanExists = (newMidspan) => {
     return midspans.some(midspan => {
-      console.log("Checking against midspan:", midspan[0]); // Log the current midspan being checked
       return midspan[0].pole1.lat === newMidspan[0].pole1.lat &&
              midspan[0].pole1.lng === newMidspan[0].pole1.lng &&
              midspan[0].pole2.lat === newMidspan[0].pole2.lat &&

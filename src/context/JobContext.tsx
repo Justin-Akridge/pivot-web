@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import React, { useEffect, createContext, useState, useContext, ReactNode } from 'react';
 import { Job } from '@/components/Jobs';
+import * as XLSX from 'xlsx'; // Import xlsx library
 
 export interface Position {
   lat: number;
@@ -25,7 +26,12 @@ interface JobContextType {
   setActiveMeasurement: (measurement: any | null) => void;
   viewer: any | null;
   setViewer: (viewer: any | null) => void;
-  saveMidspansToFile: () => void;
+  exportToExcel: () => void;
+  measurements: any[]
+  setMeasurements: (measure: any) => void;
+
+  setMidspanMeasurements: (measure: any) => void;
+  midspanMeasurements: any[]
 }
 
 const JobContext = createContext<JobContextType | undefined>(undefined);
@@ -37,6 +43,32 @@ export const JobProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [selectedMarker, setSelectedMarker] = useState<Position | null>(null);
   const [activeMeasurement, setActiveMeasurement] = useState<any | null>(null);
   const [viewer, setViewer] = useState();
+
+  const [measurements, setMeasurements] = useState([]); // Initial state is empty
+  const [midspanMeasurements, setMidspanMeasurements] = useState([]); // Initial state is empty
+  useEffect(() => {
+    // Update measurements based on the current length of poles
+    setMidspanMeasurements(Array.from({ length: midspans.length }, () => ({
+      primaries: [],
+      neutrals: [],
+      secondaries: [],
+      comms: [],
+    })))
+  }, [midspans]);
+
+  useEffect(() => {
+    // Update measurements based on the current length of poles
+    setMeasurements(Array.from({ length: poles.length }, () => ({
+      primaries: [],
+      neutrals: [],
+      secondaries: [],
+      transformers: [],
+      driploops: [],
+      risers: [],
+      comms: [],
+    })))
+  }, [poles]);
+
 
   useEffect(() => {
     fetch("/poles.json")
@@ -69,6 +101,36 @@ export const JobProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       console.error(e);
     })
   },[])
+
+  const exportToExcel = () => {
+    const combinedData = poles.map((pole, index) => {
+      // Create a new object for each pole
+      const measurement = measurements[index] || {}; // Get the corresponding measurement or an empty object
+      return {
+        id: pole.id, // Assuming pole has an 'id' property
+        lat: pole.lat, // Assuming pole has 'lat' and 'lng' properties
+        lng: pole.lng,
+        // Add measurements for this pole
+        neutrals: measurement.neutrals ? measurement.neutrals.join(', ') : '',
+        primaries: measurement.primaries ? measurement.primaries.join(', ') : '',
+        secondaries: measurement.secondaries ? measurement.secondaries.join(', ') : '',
+        transformers: measurement.transformers ? measurement.transformers.join(', ') : '',
+        driploops: measurement.driploops ? measurement.driploops.join(', ') : '',
+        risers: measurement.risers ? measurement.risers.join(', ') : '',
+        comms: measurement.comms ? measurement.comms.join(', ') : '',
+      };
+    });
+  
+    // Convert combined data to a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(combinedData);
+  
+    // Create a new workbook and append the worksheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Poles and Measurements');
+  
+    // Generate a file and prompt the user to download it
+    XLSX.writeFile(workbook, 'poles_and_measurements.xlsx');
+  };
 
   const saveMidspansToFile = () => {
     const dataStr = JSON.stringify(midspans, null, 2); // Convert midspans to JSON string
@@ -120,7 +182,8 @@ export const JobProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       activeTool, setActiveTool,
       selectedMarker, setSelectedMarker,
       activeMeasurement, setActiveMeasurement,
-      viewer, setViewer, saveMidspansToFile
+      viewer, setViewer, exportToExcel,
+      measurements, setMeasurements, setMidspanMeasurements, midspanMeasurements
     }}>
       {children}
     </JobContext.Provider>

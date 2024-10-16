@@ -35,14 +35,19 @@ export function Viewer() {
       selectedMarker.y,
       selectedMarker.z
     );
-    targetTo(viewer, polePosition, 0)
+
+    let zLevel = -2;
+    if (selectedMarker.pole1) {
+      zLevel = -5;
+    }
+    targetTo(viewer, polePosition, zLevel)
   },[selectedMarker])
 
   const targetTo = (viewer, target, zLevel) => {
 		const {view} = viewer.scene;
 		viewer.scene.orbitControls = true;
 
-		let d = viewer.scene.view.direction.multiplyScalar(-1);
+		let d = viewer.scene.view.direction.multiplyScalar(-2);
 		let cameraTargetPosition = new THREE.Vector3().addVectors(target, d.multiplyScalar(10));
 		let animationDuration = 400;
 		let easing = TWEEN.Easing.Quartic.Out;
@@ -58,7 +63,7 @@ export function Viewer() {
 				let startPos = viewer.scene.view.position.clone();
 				let targetPos = cameraTargetPosition.clone();
 				let startRadius = viewer.scene.view.radius;
-				let targetRadius = cameraTargetPosition.distanceTo(target)
+				let targetRadius = cameraTargetPosition.distanceTo(target); 
 
 				tween.onUpdate(() => {
 					// let t = value.x;
